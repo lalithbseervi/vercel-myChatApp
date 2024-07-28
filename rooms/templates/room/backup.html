@@ -1,0 +1,15 @@
+<div class="chat-messages space-y-3" id="chat-messages">
+    <!-- <div class="text-end"> {{ message.date_added }} </div>
+    <p class="font-semibold"> {{ message.user.username }} </p> -->
+    <div class="flex px-4 py-6 bg-gray-400 rounded-xl">
+        <div class="flex space-x-4">
+            <div class="font-semibold">
+                {{ message.user.username }}
+            </div> 
+            <div class="text-end">
+                {{ message.date_added }}
+            </div>  
+        </div>
+    </div> 
+    <p> {{ message.content }} </p>
+</div>

@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Welcome | {% endblock %}
+
+{% block content %}
+<div class="font-dmsans text-base md:text-xl text-center text-pretty">
+    {% if request.user.is_authenticated %}
+        <p> About Me </p>
+        <p> Username: {{ user.username }} </p>
+        {% with user_messages=request.user.messages.all %}
+            <p class="px-4 pt-2 mt-4">{{ user_messages.count }} messages sent by You.</p>
+        {% endwith %}
+            {% if rooms_joined %}
+                {% if rooms_joined.count == 1 %}
+                    <p class="px-4"> {{ rooms_joined.count }} room joined by You.</p>
+                    <p class="px-4">The following are the rooms that you have joined: </p>
+                    <ul class="px-12 list-none flex flex-col items-center">
+                        {% for room in rooms_joined %}
+                            <li class="underline"> {{ room.name }} </li>
+                        {% endfor %}
+                    </ul>
+                {% elif rooms_joined.count > 1 %}
+                    <p class="px-4"> {{ rooms_joined.count }} rooms joined by You.</p>
+                    <p class="px-4">The following are the rooms that you have joined: </p>
+                    <ul class="px-12 list-none flex flex-col items-center">
+                        {% for room in rooms_joined %}
+                            <li class="underline pb-2"> <a href="{% url 'room' room.slug %}" class="px-5 py-3 inline-block rounded-xl bg-teal-700"> {{ room.name }} </a> </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="p-4"> You haven't joined any rooms yet. </p>
+                {% endif %}
+            {% else %}
+                <p class="p-4"> You haven't joined any rooms yet. Join one <a href="{% url 'rooms' %}" class="rounded-xl underline text-gray-950 bg-teal-600 hover:text-black hover:font-semibold">here. </a></p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}  

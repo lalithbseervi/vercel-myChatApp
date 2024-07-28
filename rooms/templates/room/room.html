@@ -1,0 +1,153 @@
+{% extends 'core/base.html' %}
+{% block title %} {{ room.name }} | {% endblock %}
+
+{% block additional_links %}
+{% endblock %}
+
+{% block content %}
+
+<div class="p-10 lg:p-20 text-center">
+    <h1 class="text-3xl lg:text-6xl text-white font-spacemono"> {{ room.name }} </h1>
+</div>
+
+<style>
+    .height {
+        height: 63vh;
+    }
+</style>
+<div class="lg:w-1/2 mx-4 lg:mx-auto p-4 bg-white rounded-xl height overflow-y-auto font-spacemono" id="scroll">
+    <div class="chat-messages space-y-3" id="chat-messages">
+        {% for message in messages %}
+            {% if user.get_username == message.user.username %}
+                <div class="chat-message flex flex-col items-end text-end">
+                    <div class="chat-message-content bg-gray-200 p-2 rounded-lg my-2 w-max">
+                        <p class="font-semibold"> Me - {{ user.username }} </p> <div class="chat-message-meta text-gray-500 text-xs mt-1 my-2"> <p class="chat-message-time">{{ message.date_added }}</p></div>
+                        <p class="text-sm">{{ message.content }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="chat-message flex flex-col">
+                    <div class="chat-message-content bg-gray-200 p-2 rounded-lg my-2 w-max">
+                        <p class="font-semibold"> {{ message.user.username }} </p> <div class="chat-message-meta text-gray-500 text-xs mt-1 my-2"> <p class="chat-message-time">{{ message.date_added }}</p></div>
+                        <p class="text-sm">{{ message.content }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="lg:w-2/4 mt-6 mx-4 lg:mx-auto p-4 my-4 bg-white rounded-xl">
+    <form action="." method="post" class="flex">
+        {% csrf_token %}
+        <input type="text" name="content" class="flex-1 mr-3 border-2 rounded-full font-spacemono px-2 focus:outline-none focus:ring placeholder:italic" placeholder="Your message..." id="chat-message-input">
+        <button type="submit" class="px-5 py-3 rounded-xl text-white font-poppins bg-teal-600 hover:bg-teal-700" id="chat-message-submit"> Submit </button>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ room.slug|json_script:"json-roomname" }} 
+{{ request.user.username|json_script:"json-username" }}
+<script>
+    const roomName = JSON.parse(document.getElementById('json-roomname').textContent);
+    const userName = JSON.parse(document.getElementById('json-username').textContent);
+    const todayDate = new Date();
+    const timestamp = todayDate;
+
+    function formatToDjangoDate(timestamp) {
+        var months = [
+            'Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.',
+            'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'
+        ];
+
+        var day = timestamp.getDate();
+        var month = months[timestamp.getMonth()];
+        var year = timestamp.getFullYear();
+        var hours = timestamp.getHours() % 12 || 12; // Convert 24-hour time to 12-hour time
+        var minutes = timestamp.getMinutes();
+        var ampm = timestamp.getHours() >= 12 ? 'p.m.' : 'a.m.';
+
+        var date = month + ' ' + day + ', ' + year + ', ' + hours + ':' + (minutes < 10 ? '0' : '') + minutes + ' ' + ampm;
+
+        return date;
+    }
+
+    var date = formatToDjangoDate(timestamp);
+
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/myChatApp/rooms/'
+        + roomName
+        + '/'
+    );
+
+    // const chatSocket = new WebSocket('ws://127.0.0.1:8000/myChatApp/rooms/' + roomName + '/');
+
+    chatSocket.onmessage = function(e) {
+        console.log('onmessage');
+
+        const data = JSON.parse(e.data);
+        console.log(data);
+
+        if (data.message) {
+            if (data.username == userName) {
+                let html = '<div class="chat-message flex flex-col items-end text-end">';
+                    html += '<div class="chat-message-content bg-gray-200 p-2 rounded-lg my-2 w-max">';
+                    html += '<p class="font-semibold"> Me - ' + data.username + '</p> <div class="chat-message-meta text-gray-500 text-xs mt-1 my-2"> <p class="chat-message-time">' + date + '</p></div>';
+                    html += '<p class="text-sm">' + data.message + '</p>';   
+                    html += '</div>' + '</div>';
+                
+                    document.querySelector('#chat-messages').innerHTML += html;
+
+                    scrollToBottom();
+                }
+            else if (data.username != userName) {
+                let html = '<div class="chat-message flex flex-col">';
+                    html += '<div class="chat-message-content bg-gray-200 p-2 rounded-lg my-2 w-max">';
+                    html += '<p class="font-semibold">' + data.username + '</p> <div class="chat-message-meta text-gray-500 text-xs mt-1 my-2"> <p class="chat-message-time">' + date + '</p></div>';
+                    html +=  '<p class="text-sm">' + data.message + '</p>';
+                    html += '</div>' + '</div>';
+                    
+                    document.querySelector('#chat-messages').innerHTML += html;
+
+                    scrollToBottom();
+            }
+            else {
+                alert('The message was empty!');
+            }
+        }
+    }
+
+    chatSocket.onclose = function(e) {
+        console.log('onclose')
+    }
+
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        e.preventDefault();
+
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'username': userName,
+            'date': date,
+            'room': roomName,
+        }));
+
+        messageInputDom.value = '';
+
+        return false;
+    }
+
+    function scrollToBottom() {
+        let objDiv = document.getElementById('scroll');
+        objDiv.scrollTop = objDiv.scrollHeight;
+    }
+
+    scrollToBottom();
+</script>
+{% endblock %}

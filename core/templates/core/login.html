@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Login | {% endblock %}
+
+{% block content %}
+<style>
+  .singlePage {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+</style>
+<section class="border-red-500 bg-teal-600 min-h-screen font-poppins flex items-center justify-center overflow-y-hidden">
+    <div class="bg-gray-100 p-5 flex rounded-2xl shadow-lg max-w-3xl">
+      <div class="md:w-1/2 px-5">
+        <h2 class="text-2xl font-bold text-[#002D74]">Login</h2>
+        <p class="text-sm mt-4 text-[#002D74]">If you have an account, please login</p>
+        <form class="mt-6" action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+          <div>
+            <label class="block text-gray-700">Username</label>
+            <input type="text" name="username" id="" class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none" autofocus autocomplete required>
+          </div>
+
+          <div class="mt-4">
+            <label class="block text-gray-700">Password</label>
+            <input type="password" name="password" id="" placeholder="Enter Password" minlength="8" class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500
+                  focus:bg-white focus:outline-none" required>
+          </div>
+
+          <div class="text-right mt-2">
+            <a href="{% url 'forgotPass' %}" class="text-sm font-semibold text-gray-700 hover:text-blue-700 focus:text-blue-700">Forgot Password?</a>
+          </div>
+
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="mb-5 p-4 rounded-xl bg-red-300 text-white">
+                <p> {{ error | escape }} </p>
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
+          <button type="submit" class="w-full block bg-blue-500 hover:bg-blue-400 focus:bg-blue-400 text-white font-semibold rounded-lg px-4 py-3 mt-6">Log In</button>
+        </form>
+
+        <div class="mt-7 grid grid-cols-3 items-center text-gray-500">
+          <hr class="border-gray-500" />
+          <p class="text-center text-sm">OR</p>
+          <hr class="border-gray-500" />
+        </div>
+
+        <div class="text-sm flex justify-between items-center mt-3">
+          <p>If you don't have an account...</p>
+          <form action="{% url 'register' %}">
+            <button class="py-2 px-5 ml-3 bg-white border rounded-xl hover:scale-110 duration-300 border-blue-400">Register</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="w-1/2 md:block hidden ">
+        <img src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80" class="rounded-2xl" alt="page img">
+      </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.body.classList.add('singlePage');
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="data:,">
+        <title> {% block title %} {% endblock %} Homepage </title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,100;9..40,400&family=Poppins&family=Space+Mono:ital@0;1&family=Raleway&family=Montserrat&family=Courier+Prime&display=swap" rel="stylesheet">
+        {% tailwind_css %}
+        <style>
+            nav {
+                text-align: center;
+            }
+          
+            .mobile-menu {
+                display: none;
+            }
+        </style>
+    </head>
+    <body class="bg-teal-600">
+        {% url 'rooms' as roomsURL %}
+        {% url 'createRoom' as createRoomURL %}
+        {% url 'register' as registerURL %}
+        {% url 'login' as loginURL %}
+           <nav class="flex px-4 pt-6 pb-2 bg-teal-800 shadow-lg font-poppins text-xl">
+            <div class="flex items-start">
+                <a class="pt-5 px-2 text-purple-500" href="{% url 'frontPage' %}"> Chatspace </a>
+            </div>
+                <div class="w-full mx-auto px-4">
+                    <div class="flex w-full justify-evenly">
+                        <div class="hidden md:flex flex-grow justify-center items-center space-x-1">
+                            <a href="{% url 'frontPage' %}" class="py-4 px-2 text-gray-800 {% if request.path == '/' %} border-b-4 border-purple-500 text-purple-500 {% endif %}">Home</a>
+                            {% block additional_links %}
+                            {% endblock %}
+                            {% if request.user.is_authenticated %}
+                                <a href="{% url 'rooms' %}" class="py-4 px-2 text-gray-800 {% if request.path == roomsURL %} border-b-4 border-purple-500 text-purple-500 {% endif %} hover:text-purple-500 transition duration-300">Rooms</a>
+                                <a href="{% url 'createRoom' %}" class="py-4 px-2 text-gray-800 {% if request.path == createRoomURL %} border-b-4 border-purple-500 text-purple-500 {% endif %} hover:text-purple-500 transition duration-300">Create Room</a>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="py-1 rounded-xl text-gray-800 hover:text-purple-500 transition duration-300"> Logout </button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="py-4 px-2 text-gray-800 {% if request.path == loginURL %} border-b-4 border-purple-500 text-purple-500 {% endif %} hover:text-purple-500 transition duration-300">Login</a>
+                                <a href="{% url 'register' %}" class="py-4 px-2 text-gray-800 {% if request.path == registerURL %} border-b-4 border-purple-500 text-purple-500 {% endif %} hover:text-purple-500 transition duration-300">Register</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="md:hidden lg:hidden">
+                <nav class="bg-teal-800 shadow-lg font-poppins text-end py-2">
+                    <div class="fixed top-0 right-0 px-4 pt-8" id="mobileMenu">
+                        <p class="flex px-4 pt-2 bg-teal-800 text-xl text-purple-500"> Navigation </p>
+                    </div>
+                    <div class="block px-8">
+                        <ul class="mobile-menu text-md" id="unorderedList">
+                            <li>
+                                <a href="{% url 'frontPage' %}"> Homepage </a>
+                            </li>
+                            {% if request.user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'rooms' %}"> Rooms </a>
+                               </li>
+                               <li>
+                                    <a href="{% url 'createRoom' %}"> Create Room </a>
+                                </li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post">
+                                        {% csrf_token %}
+                                            <button type="submit" class="pb-1 border p-2 rounded-md border-gray-900 text-gray-900 text-sm"> Logout </button>
+                                    </form>
+                                </li>
+                            {% else %}
+                                <li>
+                                    <a href="{% url 'login' %}">Login</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'register' %}">Register</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            
+           <div class="px-4 pt-4">
+                {% if user.get_username %}
+                    <p class="text-sm md:text-lg pb-1 text-white font-poppins"> You are logged in as {{ user.get_username }}! </p>
+                {% else %}
+                    <p class="text-md md:text-lg pb-1 text-white font-poppins"> You are not logged in. </p>
+                {% endif %}
+            </div>
+           {% block content %}
+           {% endblock %}
+
+           <script>
+                let tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (!tz) {
+                    tz = "UTC"
+                }
+                document.cookie = "mytz=" + tz + ";path=/";
+                let tiemzone = tz;
+            </script>
+            <script>
+                document.getElementById('mobileMenu').addEventListener('click', function () {
+                  var mobileMenu = document.querySelector('.mobile-menu');
+                  mobileMenu.style.display = (mobileMenu.style.display === 'block') ? 'none' : 'block';
+                });
+                var unorderedList = document.getElementById('unorderedList');
+
+                if (unorderedList) {
+                    var listItems = unorderedList.getElementsByTagName('li');
+                    for (var i = 0; i < listItems.length; i++) {
+                        listItems[i].classList.add('pb-2');
+                    }
+
+                    var links = unorderedList.getElementsByTagName('a');
+                    for (var i = 0; i < links.length; i++) {
+                        links[i].classList.add('block', 'border', 'p-2', 'rounded-md', 'border-gray-900', 'text-gray-900', 'text-sm', 'w-max', 'ml-auto');
+                    }
+                }
+            </script>
+           {% block scripts %}
+           {% endblock %}
+    </body>
+</html>
