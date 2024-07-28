@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [{
         "src": "myChatApp/wsgi.py",
-        "use": "@vercel/python",
+        "use": "@ardnt/vercel-python-wsgi",
         "config": { "maxLambdaSize": "15mb", "runtime": "python3.12" }
     },
     {
