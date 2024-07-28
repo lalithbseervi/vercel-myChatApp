@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +25,7 @@ SECRET_KEY = 'django-insecure-*rfi!u$*lix*qgrfa@dy0%=2^82nhs%a6=c3#5^cazyz*5p#ug
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1', 'localhost']
 # CORS_ALLOW_ALL_ORIGINS = False
 # CSRF_ALLOWED_ORIGINS = ["http://localhost:8000", "https://113f-171-76-82-107.ngrok-free.app"]
 # CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://113f-171-76-82-107.ngrok-free.app"]
@@ -108,10 +109,15 @@ CHANNEL_LAYERS={
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.sqlite3',
-       'NAME': BASE_DIR / 'db.sqlite3',
-   }
+  'default': {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': 'test-db',
+    'USER': 'lalithbseervi',
+    'PASSWORD': '2qtaEgkiQ6Id',
+    'HOST': 'ep-ancient-frost-a12wunl9.ap-southeast-1.aws.neon.tech',
+    'PORT': '5432',
+    'OPTIONS': {'sslmode': 'require'},
+  }
 }
 
 # Password validation
@@ -148,6 +154,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'theme/static/'
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'theme/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'theme/static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
